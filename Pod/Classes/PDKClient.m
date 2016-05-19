@@ -241,6 +241,9 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
         // if we came here via SFSafariViewController then we need to dismiss the VC
         if (NSClassFromString(@"SFSafariViewController") != nil) {
             UIViewController *mainViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+            if ([mainViewController isKindOfClass:[UINavigationController class]]) {
+                mainViewController = [[(UINavigationController *)mainViewController visibleViewController] presentingViewController];
+            }
             if ([[mainViewController presentedViewController] isKindOfClass:[SFSafariViewController class]]) {
                 [mainViewController dismissViewControllerAnimated:YES completion:nil];
             }
@@ -596,6 +599,9 @@ static void defaultFailureAction(PDKClientFailure failureBlock, NSError *error)
     NSString *scheme = [[url scheme] lowercaseString];
     if (NSClassFromString(@"SFSafariViewController") != nil && ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"])) {
         UIViewController *viewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+        if ([viewController isKindOfClass:[UINavigationController class]]) {
+            viewController = [(UINavigationController *)viewController visibleViewController];
+        }
         SFSafariViewController *safariViewController = [[SFSafariViewController alloc] initWithURL:url];
         [viewController presentViewController:safariViewController animated:YES completion:nil];
     } else if ([[UIApplication sharedApplication] canOpenURL:url]) {
