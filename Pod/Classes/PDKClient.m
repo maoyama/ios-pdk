@@ -39,6 +39,7 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
 @property (nonatomic, assign, readwrite) BOOL authorized;
 @property (nonatomic, copy) PDKClientSuccess authenticationSuccessBlock;
 @property (nonatomic, copy) PDKClientFailure authenticationFailureBlock;
+@property (nonatomic, assign) BOOL shuldUseSFSafariVC;
 
 @end
 
@@ -66,6 +67,7 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     if (self = [super initWithBaseURL:baseURL]) {
         _configured = NO;
         _authorized = NO;
+        _shouldUseSFSafariVC = YES;
     }
     return self;
 }
@@ -219,7 +221,11 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
             
             // open the web oauth
             oauthURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@?%@", kPDKPinterestWebOAuthURLString, [params _PDK_queryStringValue]]];
-            [PDKClient openURL:oauthURL];
+            if (_shouldUseSFSafariVC) {
+                [PDKClient openURL:oauthURL];
+            } else if ([[UIApplication sharedApplication] canOpenURL:oauthURL]) {
+                    [[UIApplication sharedApplication] openURL:oauthURL];
+            }
         }
     } else if (silent && failureBlock) {
         // silent was yes, but we did not have a cached token. that counts as a failure.
@@ -239,7 +245,7 @@ static NSString * const kPDKPinterestWebOAuthURLString = @"https://api.pinterest
     NSString *urlScheme = [url scheme];
     if ([urlScheme isEqualToString:self.clientRedirectURLString]) {
         // if we came here via SFSafariViewController then we need to dismiss the VC
-        if (NSClassFromString(@"SFSafariViewController") != nil) {
+        if (NSClassFromString(@"SFSafariViewController") != nil && _shouldUseSFSafariVC) {
             UIViewController *mainViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
             if ([[mainViewController presentedViewController] isKindOfClass:[SFSafariViewController class]]) {
                 [mainViewController dismissViewControllerAnimated:YES completion:nil];

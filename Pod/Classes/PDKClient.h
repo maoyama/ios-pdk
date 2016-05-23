@@ -77,6 +77,11 @@ typedef void (^PDKPinUploadProgress)(CGFloat percentComplete);
 @property (nonatomic, readonly) BOOL authorized;
 
 /**
+ *
+ */
+@property (nonatomic) BOOL shouldUseSFSafariVC;
+
+/**
  *  PDKClient is a singleton. This will return the one instance of the client.
  *
  *  @return A PDKClient object
